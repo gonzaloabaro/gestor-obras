@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { Header } from '@/components/layout/Header'
 import { formatCurrency, formatDate, STATUS_CONFIG } from '@/lib/utils'
+import type { ProjectStatus } from '@/types'
 import { Plus, TrendingUp, Clock, CheckCircle, PauseCircle } from 'lucide-react'
 
 export default async function DashboardPage() {
@@ -134,7 +135,7 @@ export default async function DashboardPage() {
           ) : (
             <div className="divide-y divide-[#1E1E20]">
               {obrasRecientes.map(obra => {
-                const config = STATUS_CONFIG[obra.estado]
+                const config = STATUS_CONFIG[obra.estado as ProjectStatus]
                 return (
                   <Link
                     key={obra.id}
