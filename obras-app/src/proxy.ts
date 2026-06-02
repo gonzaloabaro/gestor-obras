@@ -30,13 +30,14 @@ export async function proxy(request: NextRequest) {
   const isAuthRoute = request.nextUrl.pathname.startsWith('/login') ||
                       request.nextUrl.pathname.startsWith('/register') ||
                       request.nextUrl.pathname.startsWith('/forgot-password') ||
-                      request.nextUrl.pathname.startsWith('/reset-password')
+                      request.nextUrl.pathname.startsWith('/reset-password') ||
+                      request.nextUrl.pathname.startsWith('/auth')
 
   if (!user && !isAuthRoute) {
     return NextResponse.redirect(new URL('/login', request.url))
   }
 
-  if (user && isAuthRoute) {
+if (user && isAuthRoute && !request.nextUrl.pathname.startsWith('/reset-password')) {
     return NextResponse.redirect(new URL('/', request.url))
   }
 
