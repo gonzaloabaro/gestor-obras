@@ -3,11 +3,12 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { signUp } from '@/actions/auth.actions'
-import { Building2, Loader2 } from 'lucide-react'
+import { Building2, Loader2, Eye, EyeOff } from 'lucide-react'
 
 export default function RegisterPage() {
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
+  const [showPassword, setShowPassword] = useState(false)
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
@@ -84,13 +85,22 @@ export default function RegisterPage() {
             <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
               Contraseña
             </label>
-            <input
-              name="password"
-              type="password"
-              required
-              placeholder="Mínimo 6 caracteres"
-              className="w-full h-10 px-3 bg-[#0F0F10] border border-[#1E1E20] rounded-md text-sm text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:border-amber-500/50 focus:ring-1 focus:ring-amber-500/20 transition-all"
-            />
+            <div className="relative">
+              <input
+                name="password"
+                type={showPassword ? 'text' : 'password'}
+                required
+                placeholder="Mínimo 6 caracteres"
+                className="w-full h-10 px-3 pr-10 bg-[#0F0F10] border border-[#1E1E20] rounded-md text-sm text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:border-amber-500/50 focus:ring-1 focus:ring-amber-500/20 transition-all"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+              >
+                {showPassword ? <EyeOff size={15} /> : <Eye size={15} />}
+              </button>
+            </div>
           </div>
 
           {error && (
@@ -117,10 +127,7 @@ export default function RegisterPage() {
 
         <p className="text-center text-sm text-muted-foreground mt-6">
           ¿Ya tenés cuenta?{' '}
-          <Link
-            href="/login"
-            className="text-amber-400 hover:text-amber-300 transition-colors"
-          >
+          <Link href="/login" className="text-amber-400 hover:text-amber-300 transition-colors">
             Ingresar
           </Link>
         </p>
