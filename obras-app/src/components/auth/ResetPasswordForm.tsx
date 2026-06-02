@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { Loader2, Eye, EyeOff } from 'lucide-react'
@@ -11,8 +11,26 @@ export function ResetPasswordForm() {
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirm, setShowConfirm] = useState(false)
   const [done, setDone] = useState(false)
+  const [ready, setReady] = useState(false)
   const router = useRouter()
   const supabase = createClient()
+
+  useEffect(() => {
+    // Supabase envía el token en el hash de la URL
+    // El cliente de Supabase lo procesa automáticamente al detectar el evento
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (event === 'PASSWORD_RECOVERY') {
+        setReady(true)
+      }
+    })
+
+    // También verificar si ya hay sesión activa por el token
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session) setReady(true)
+    })
+
+    return () => subscription.unsubscribe()
+  }, [])
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
@@ -38,7 +56,7 @@ export function ResetPasswordForm() {
     const { error } = await supabase.auth.updateUser({ password })
 
     if (error) {
-      setError('Error al actualizar la contraseña. El link puede haber expirado.')
+      setError('Error al actualizar la contraseña. Pedí un nuevo link de reseteo.')
       setLoading(false)
       return
     }
@@ -59,6 +77,20 @@ export function ResetPasswordForm() {
         <p className="text-sm text-muted-foreground">
           Redirigiendo al dashboard...
         </p>
+      </div>
+    )
+  }
+
+  if (!ready) {
+    return (
+      <div className="animate-fade-in-up">
+        <h1 className="font-display text-3xl text-foreground mb-4">
+          Nueva contraseña
+        </h1>
+        <div className="flex items-center gap-3 text-sm text-muted-foreground">
+          <Loader2 size={16} className="animate-spin text-amber-400" />
+          Verificando link...
+        </div>
       </div>
     )
   }
