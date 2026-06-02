@@ -39,13 +39,10 @@ export async function signUp(formData: FormData): Promise<ActionResult> {
   const { error } = await supabase.auth.signUp({
     email,
     password,
-    options: {
-      data: { nombre },
-    },
+    options: { data: { nombre } },
   })
 
-if (error) {
-    console.error('SignUp error:', error.message, error.status)
+  if (error) {
     if (error.message.includes('already registered')) {
       return { success: false, error: 'Este email ya está registrado.' }
     }
@@ -60,4 +57,45 @@ export async function signOut() {
   const supabase = await createClient()
   await supabase.auth.signOut()
   redirect('/login')
+}
+
+export async function resetPasswordRequest(formData: FormData): Promise<ActionResult> {
+  const supabase = await createClient()
+  const email = formData.get('email') as string
+
+  if (!email) {
+    return { success: false, error: 'El email es requerido.' }
+  }
+
+  const { error } = await supabase.auth.resetPasswordForEmail(email, {
+    redirectTo: 'https://arquiflow.estudionohte.com.ar/reset-password',
+  })
+
+  if (error) {
+    return { success: false, error: 'Error al enviar el email. Verificá la dirección.' }
+  }
+
+  return { success: true, data: undefined }
+}
+
+export async function updatePassword(formData: FormData): Promise<ActionResult> {
+  const supabase = await createClient()
+  const password = formData.get('password') as string
+  const confirm  = formData.get('confirm') as string
+
+  if (!password || password.length < 6) {
+    return { success: false, error: 'La contraseña debe tener al menos 6 caracteres.' }
+  }
+
+  if (password !== confirm) {
+    return { success: false, error: 'Las contraseñas no coinciden.' }
+  }
+
+  const { error } = await supabase.auth.updateUser({ password })
+
+  if (error) {
+    return { success: false, error: 'Error al actualizar la contraseña.' }
+  }
+
+  return { success: true, data: undefined }
 }
