@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
+import { getMiRol } from '@/actions/members.actions'
 import { Header } from '@/components/layout/Header'
 import { formatCurrency, formatDate, STATUS_CONFIG } from '@/lib/utils'
 import type { ProjectStatus } from '@/types'
@@ -15,10 +16,13 @@ export default async function DashboardPage() {
     .eq('id', user!.id)
     .single()
 
+  const rol = await getMiRol()
+  const canCreate = rol === 'owner' || rol === 'admin'
+
+  // RLS filtra las obras accesibles (owner/admin: todas del estudio; miembro: asignadas)
   const { data: obras } = await supabase
     .from('projects')
     .select('*')
-    .eq('user_id', user!.id)
     .order('created_at', { ascending: false })
 
   const { data: gastos } = await supabase
@@ -46,13 +50,15 @@ export default async function DashboardPage() {
         title={`Hola, ${profile?.nombre ?? 'Arquitecto'}`}
         subtitle="Resumen general de tus proyectos"
         actions={
-          <Link
-            href="/obras/nueva"
-            className="flex items-center gap-2 h-9 px-4 bg-amber-500 hover:bg-amber-400 text-black font-medium text-sm rounded-md transition-all"
-          >
-            <Plus size={15} />
-            Nueva obra
-          </Link>
+          canCreate ? (
+            <Link
+              href="/obras/nueva"
+              className="flex items-center gap-2 h-9 px-4 bg-amber-500 hover:bg-amber-400 text-black font-medium text-sm rounded-md transition-all"
+            >
+              <Plus size={15} />
+              Nueva obra
+            </Link>
+          ) : undefined
         }
       />
 

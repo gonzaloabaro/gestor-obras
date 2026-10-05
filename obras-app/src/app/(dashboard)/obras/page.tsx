@@ -1,11 +1,14 @@
 import Link from 'next/link'
 import { getObras } from '@/actions/obras.actions'
+import { getMiRol } from '@/actions/members.actions'
 import { Header } from '@/components/layout/Header'
 import { ObraCard } from '@/components/obras/ObraCard'
 import { Plus } from 'lucide-react'
 
 export default async function ObrasPage() {
   const obras = await getObras()
+  const rol = await getMiRol()
+  const canCreate = rol === 'owner' || rol === 'admin'
 
   return (
     <div className="animate-fade-in-up">
@@ -13,13 +16,15 @@ export default async function ObrasPage() {
         title="Obras"
         subtitle={`${obras.length} proyecto${obras.length !== 1 ? 's' : ''} en total`}
         actions={
-          <Link
-            href="/obras/nueva"
-            className="flex items-center gap-2 h-9 px-4 bg-amber-500 hover:bg-amber-400 text-black font-medium text-sm rounded-md transition-all"
-          >
-            <Plus size={15} />
-            Nueva obra
-          </Link>
+          canCreate ? (
+            <Link
+              href="/obras/nueva"
+              className="flex items-center gap-2 h-9 px-4 bg-amber-500 hover:bg-amber-400 text-black font-medium text-sm rounded-md transition-all"
+            >
+              <Plus size={15} />
+              Nueva obra
+            </Link>
+          ) : undefined
         }
       />
 
@@ -32,15 +37,19 @@ export default async function ObrasPage() {
             Sin obras todavía
           </h3>
           <p className="text-sm text-muted-foreground mb-6 max-w-xs">
-            Creá tu primer proyecto para empezar a gestionar tus obras.
+            {canCreate
+              ? 'Creá tu primer proyecto para empezar a gestionar tus obras.'
+              : 'Todavía no tenés obras asignadas.'}
           </p>
-          <Link
-            href="/obras/nueva"
-            className="flex items-center gap-2 h-9 px-4 bg-amber-500 hover:bg-amber-400 text-black font-medium text-sm rounded-md transition-all"
-          >
-            <Plus size={15} />
-            Crear primera obra
-          </Link>
+          {canCreate && (
+            <Link
+              href="/obras/nueva"
+              className="flex items-center gap-2 h-9 px-4 bg-amber-500 hover:bg-amber-400 text-black font-medium text-sm rounded-md transition-all"
+            >
+              <Plus size={15} />
+              Crear primera obra
+            </Link>
+          )}
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">

@@ -4,15 +4,18 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createObra, updateObra } from '@/actions/obras.actions'
 import { Loader2 } from 'lucide-react'
-import type { Project, ProjectStatus } from '@/types'
+import type { Project, ProjectStatus, MiembroRow } from '@/types'
 
 const ESTADOS: ProjectStatus[] = ['Pendiente', 'En progreso', 'Finalizada', 'Pausada']
 
 interface ObraFormProps {
   obra?: Project
+  asignables?: MiembroRow[]
+  asignadosIds?: string[]
+  canAssign?: boolean
 }
 
-export function ObraForm({ obra }: ObraFormProps) {
+export function ObraForm({ obra, asignables = [], asignadosIds = [], canAssign = false }: ObraFormProps) {
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
   const router = useRouter()
@@ -28,10 +31,14 @@ export function ObraForm({ obra }: ObraFormProps) {
       ? await updateObra(obra.id, formData)
       : await createObra(formData)
 
-    if (result && !result.success) {
+    if (!result.success) {
       setError(result.error)
       setLoading(false)
+      return
     }
+
+    const destId = obra ? obra.id : (result.data as Project).id
+    router.push(`/obras/${destId}`)
   }
 
   const inputClass = "w-full h-10 px-3 bg-[#0A0A0B] border border-[#1E1E20] rounded-md text-sm text-foreground placeholder:text-muted-foreground/40 focus:outline-none focus:border-amber-500/50 focus:ring-1 focus:ring-amber-500/20 transition-all"
@@ -131,6 +138,36 @@ export function ObraForm({ obra }: ObraFormProps) {
           className="w-full px-3 py-2.5 bg-[#0A0A0B] border border-[#1E1E20] rounded-md text-sm text-foreground placeholder:text-muted-foreground/40 focus:outline-none focus:border-amber-500/50 focus:ring-1 focus:ring-amber-500/20 transition-all resize-none"
         />
       </div>
+
+      {canAssign && (
+        <div className="pt-2 border-t border-[#1A1A1C]">
+          <label className={labelClass}>Miembros asignados</label>
+          {asignables.length === 0 ? (
+            <p className="text-xs text-muted-foreground">
+              No hay miembros para asignar. Agregá empleados en la sección Equipo.
+            </p>
+          ) : (
+            <div className="space-y-2 mt-1">
+              {asignables.map((mb) => (
+                <label key={mb.userId} className="flex items-center gap-2.5 text-sm text-foreground cursor-pointer">
+                  <input
+                    type="checkbox"
+                    name="asignados"
+                    value={mb.userId}
+                    defaultChecked={asignadosIds.includes(mb.userId)}
+                    className="w-4 h-4 rounded border-[#1E1E20] bg-[#0A0A0B] accent-amber-500"
+                  />
+                  <span>{mb.nombre}</span>
+                  <span className="text-muted-foreground/50 text-xs">{mb.email}</span>
+                </label>
+              ))}
+            </div>
+          )}
+          <p className="text-xs text-muted-foreground/70 mt-2">
+            Owners y admins ven todas las obras. Acá elegís qué miembros pueden ver y editar esta obra.
+          </p>
+        </div>
+      )}
 
       {error && (
         <div className="text-xs text-red-400 bg-red-400/10 border border-red-400/20 rounded-md px-3 py-2">
