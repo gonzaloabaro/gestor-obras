@@ -105,7 +105,7 @@ export function EstudioForm({ planes }: EstudioFormProps) {
     <form onSubmit={handleSubmit} className="space-y-5">
       <div>
         <label className={labelClass}>Nombre del estudio *</label>
-        <input name="nombre_estudio" type="text" required placeholder="Ej: Estudio Nohte" className={inputClass} />
+        <input name="nombre_estudio" type="text" required placeholder="Ej: Estudio García" className={inputClass} />
       </div>
 
       <div>

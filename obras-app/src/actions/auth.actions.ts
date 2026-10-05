@@ -2,6 +2,7 @@
 
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
+import { headers } from 'next/headers'
 import { createClient } from '@/lib/supabase/server'
 import type { ActionResult } from '@/types'
 
@@ -15,38 +16,6 @@ export async function signIn(formData: FormData): Promise<ActionResult> {
 
   if (error) {
     return { success: false, error: 'Email o contraseña incorrectos.' }
-  }
-
-  revalidatePath('/', 'layout')
-  redirect('/')
-}
-
-export async function signUp(formData: FormData): Promise<ActionResult> {
-  const supabase = await createClient()
-
-  const email    = formData.get('email') as string
-  const password = formData.get('password') as string
-  const nombre   = formData.get('nombre') as string
-
-  if (!nombre || !email || !password) {
-    return { success: false, error: 'Todos los campos son requeridos.' }
-  }
-
-  if (password.length < 6) {
-    return { success: false, error: 'La contraseña debe tener al menos 6 caracteres.' }
-  }
-
-  const { error } = await supabase.auth.signUp({
-    email,
-    password,
-    options: { data: { nombre } },
-  })
-
-  if (error) {
-    if (error.message.includes('already registered')) {
-      return { success: false, error: 'Este email ya está registrado.' }
-    }
-    return { success: false, error: error.message }
   }
 
   revalidatePath('/', 'layout')
@@ -67,8 +36,13 @@ export async function resetPasswordRequest(formData: FormData): Promise<ActionRe
     return { success: false, error: 'El email es requerido.' }
   }
 
+  const origin =
+    (await headers()).get('origin') ??
+    process.env.NEXT_PUBLIC_SITE_URL ??
+    'http://localhost:3000'
+
   const { error } = await supabase.auth.resetPasswordForEmail(email, {
-    redirectTo: 'https://arquiflow.estudionohte.com.ar/reset-password',
+    redirectTo: `${origin}/auth/callback`,
   })
 
   if (error) {

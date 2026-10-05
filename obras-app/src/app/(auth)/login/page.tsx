@@ -120,13 +120,6 @@ export default function LoginPage() {
             ¿Olvidaste tu contraseña?
           </Link>
         </div>
-
-        <p className="text-center text-sm text-muted-foreground mt-4">
-          ¿No tenés cuenta?{' '}
-          <Link href="/register" className="text-amber-400 hover:text-amber-300 transition-colors">
-            Crear cuenta
-          </Link>
-        </p>
       </div>
     </div>
   )
