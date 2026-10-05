@@ -73,34 +73,37 @@ export async function createObra(formData: FormData): Promise<ActionResult<Proje
     return { success: false, error: 'Nombre y cliente son requeridos.' }
   }
 
-  const { data, error } = await supabase
-    .from('projects')
-    .insert({
-      org_id: m.orgId,
-      user_id: m.userId,
-      nombre,
-      cliente,
-      direccion: direccion || null,
-      fecha_inicio: fecha_inicio || null,
-      fecha_fin_estimada: fecha_fin_estimada || null,
-      estado: estado || 'Pendiente',
-      presupuesto,
-      descripcion: descripcion || null,
-    })
-    .select()
-    .single()
+  const id = crypto.randomUUID()
 
-  if (error || !data) return { success: false, error: 'Error al crear la obra.' }
+  const nueva = {
+    id,
+    org_id: m.orgId,
+    user_id: m.userId,
+    nombre,
+    cliente,
+    direccion: direccion || null,
+    fecha_inicio: fecha_inicio || null,
+    fecha_fin_estimada: fecha_fin_estimada || null,
+    estado: estado || 'Pendiente',
+    presupuesto,
+    descripcion: descripcion || null,
+  }
+
+  // Insert sin .select() a proposito: la politica SELECT (auth_can_access_project, STABLE)
+  // no "ve" la fila recien insertada en el mismo statement y haria fallar el RETURNING.
+  const { error } = await supabase.from('projects').insert(nueva)
+
+  if (error) return { success: false, error: 'Error al crear la obra.' }
 
   const asignados = formData.getAll('asignados').map(String).filter(Boolean)
   if (asignados.length > 0) {
     await supabase
       .from('project_members')
-      .insert(asignados.map((uid) => ({ project_id: data.id, user_id: uid })))
+      .insert(asignados.map((uid) => ({ project_id: id, user_id: uid })))
   }
 
   revalidatePath('/obras')
-  return { success: true, data }
+  return { success: true, data: nueva as Project }
 }
 
 export async function updateObra(id: string, formData: FormData): Promise<ActionResult> {
