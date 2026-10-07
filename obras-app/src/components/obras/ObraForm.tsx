@@ -13,9 +13,10 @@ interface ObraFormProps {
   asignables?: MiembroRow[]
   asignadosIds?: string[]
   canAssign?: boolean
+  canEditNombre?: boolean
 }
 
-export function ObraForm({ obra, asignables = [], asignadosIds = [], canAssign = false }: ObraFormProps) {
+export function ObraForm({ obra, asignables = [], asignadosIds = [], canAssign = false, canEditNombre = true }: ObraFormProps) {
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
   const router = useRouter()
@@ -55,8 +56,14 @@ export function ObraForm({ obra, asignables = [], asignadosIds = [], canAssign =
             required
             defaultValue={obra?.nombre}
             placeholder="Ej: Residencia García"
-            className={inputClass}
+            disabled={!canEditNombre}
+            className={canEditNombre ? inputClass : inputClass + ' opacity-60 cursor-not-allowed'}
           />
+          {!canEditNombre && (
+            <p className="text-xs text-muted-foreground/70 mt-1.5">
+              El nombre de la obra no se puede modificar.
+            </p>
+          )}
         </div>
         <div>
           <label className={labelClass}>Cliente *</label>

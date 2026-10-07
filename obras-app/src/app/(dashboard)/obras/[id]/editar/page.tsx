@@ -22,7 +22,7 @@ export default async function EditarObraPage({
     <div className="animate-fade-in-up max-w-2xl">
       <Header title="Editar obra" subtitle={obra.nombre} />
       <div className="bg-[#0F0F10] border border-[#1E1E20] rounded-lg p-6">
-        <ObraForm obra={obra} asignables={asignables} asignadosIds={asignadosIds} canAssign={canAssign} />
+        <ObraForm obra={obra} asignables={asignables} asignadosIds={asignadosIds} canAssign={canAssign} canEditNombre={canAssign} />
       </div>
     </div>
   )

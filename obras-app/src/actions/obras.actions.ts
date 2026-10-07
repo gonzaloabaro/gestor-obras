@@ -124,18 +124,23 @@ export async function updateObra(id: string, formData: FormData): Promise<Action
     return { success: false, error: 'Nombre y cliente son requeridos.' }
   }
 
+  const canEditNombre = m.rol === 'owner' || m.rol === 'admin'
+
+  // El miembro puede editar todo MENOS el nombre: solo owner/admin lo incluyen.
+  const cambios: Record<string, unknown> = {
+    cliente,
+    direccion: direccion || null,
+    fecha_inicio: fecha_inicio || null,
+    fecha_fin_estimada: fecha_fin_estimada || null,
+    estado,
+    presupuesto,
+    descripcion: descripcion || null,
+  }
+  if (canEditNombre) cambios.nombre = nombre
+
   const { error } = await supabase
     .from('projects')
-    .update({
-      nombre,
-      cliente,
-      direccion: direccion || null,
-      fecha_inicio: fecha_inicio || null,
-      fecha_fin_estimada: fecha_fin_estimada || null,
-      estado,
-      presupuesto,
-      descripcion: descripcion || null,
-    })
+    .update(cambios)
     .eq('id', id)
 
   if (error) return { success: false, error: 'Error al actualizar la obra.' }
