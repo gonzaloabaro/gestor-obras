@@ -40,7 +40,7 @@ export default async function DashboardLayout({
           {children}
         </div>
       </main>
-      <MobileNav />
+      <MobileNav rol={rol} isSuperAdmin={isSuperAdmin} />
     </div>
   )
 }

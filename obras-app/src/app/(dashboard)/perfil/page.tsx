@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { signOut } from '@/actions/auth.actions'
 import { Header } from '@/components/layout/Header'
+import { ChangePasswordForm } from '@/components/auth/ChangePasswordForm'
 import { LogOut } from 'lucide-react'
 
 export default async function PerfilPage() {
@@ -39,7 +40,14 @@ export default async function PerfilPage() {
         </div>
       </div>
 
-      <form action={signOut} className="mt-4">
+      <div className="mt-6 bg-[#0F0F10] border border-[#1E1E20] rounded-lg p-5">
+        <p className="text-xs text-muted-foreground uppercase tracking-wider mb-4">
+          Cambiar contraseña
+        </p>
+        <ChangePasswordForm />
+      </div>
+
+      <form action={signOut} className="mt-6">
         <button
           type="submit"
           className="flex items-center gap-2 text-sm text-muted-foreground hover:text-red-400 transition-colors"
